@@ -11,6 +11,7 @@ require 'rspec/expectations'
 require 'watir'
 require 'rake'
 require 'pry'
+require 'page-object'
 require_relative './list_tags'
 
 

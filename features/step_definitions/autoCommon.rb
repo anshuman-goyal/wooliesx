@@ -1,8 +1,12 @@
+require_relative '../Page_Object/page_Object.rb'
+
 Given(/^I am on digital home screen$/) do
   digital_home_url = 'http://automationpractice.com/index.php'
 
   puts "URL : #{digital_home_url}"
   @browser.goto(digital_home_url)
+
+  $purchase = ShopJourney.new($browser)
 
   if @browser.title == 'Certificate Error: Navigation Blocked'
     @browser.goto("javascript:document.getElementById('overridelink').click()")
@@ -11,64 +15,61 @@ end
 
 
 Then(/^I will add product to cart$/) do
-@browser.div(class: /product-container/).wait_until(&:present?)
-@browser.div(class: /product-container/).click
-@browser.div(class: /pb-center-column col-xs-12 col-sm-4/).wait_until(&:present?)
-@browser.div(class: /box-cart-bottom/).p.click
+  $purchase.product_container(0).wait_until(&:present?)
+  $purchase.product_container(0).click
+  $purchase.product_description.wait_until(&:present?)
+  $purchase.product_detail_cart_button.p.click
 end
 
 And(/^I will continue shopping and add one more product$/) do
-  binding.pry
-  @browser.div(id: /layer_cart/).wait_until(&:present?)
-  @browser.div(class: /button-container/).span.click
-  @browser.div(class: /box-cart-bottom/).p.click
-  @browser.div(id: /layer_cart/).wait_until(&:present?)
-  @browser.div(class: /button-container/).a.click
+  $purchase.product_add_successfully_layer.wait_until(&:present?)
+  $purchase.product_add_successfully_layer_continue_shopping.span.click
+  $purchase.product_detail_cart_button.p.click
+  $purchase.product_add_successfully_layer.wait_until(&:present?)
+  $purchase.product_add_successfully_layer_proceed_checkout.click
 end
-
 
 And(/^I click on proceed to checkout button$/) do
-  binding.pry
-  @browser.div(id: /center_column/).wait_until(&:present?)
-  @browser.p(class: /cart_navigation clearfix/).span.click
+  $purchase.proceed_checkout_section.wait_until(&:present?)
+  $purchase.proceed_checkout.span.click
 end
+
 Then(/^I sign in to account$/) do
-  @browser.div(class: /form_content clearfix/, index:1).wait_until(&:present?)
-  @browser.div(class: /form_content clearfix/, index:1).text_field(id: /email/).set("agoyal.optus@gmail.com.au")
-  @browser.div(class: /form_content clearfix/, index:1).text_field(id: /email/).send_keys :tab
-  @browser.div(class: /form_content clearfix/, index:1).text_field(id: /passwd/).set("Dec@2020")
-  @browser.div(class: /form_content clearfix/, index:1).text_field(id: /passwd/).send_keys :tab
-  @browser.p(class: /submit/).button.click
+  $purchase.sign_in_section.wait_until(&:present?)
+  $purchase.sign_in_section_fields(1, 'email').set("agoyal.optus@gmail.com.au")
+  $purchase.sign_in_section_fields(1, 'email').send_keys :tab
+  $purchase.sign_in_section_fields(1, 'passwd').set("Dec@2020")
+  $purchase.sign_in_section_fields(1, 'passwd').send_keys :tab
+  $purchase.sign_in_section_button.button.click
 end
 
 And(/^I agree to T & C$/) do
-  @browser.label(:visible_text => /I agree to the terms./).click
+  $purchase.terms_condition.click
 end
 
 And(/^I provide payment details$/) do
-  @browser.p(class: /payment_module/).wait_until(&:present?)
-  @browser.p(class: /payment_module/, index:1).click
+  $purchase.payment_section.wait_until(&:present?)
+  $purchase.payment_pay_check.click
 end
 
 And(/^I click on confirm order button$/) do
-  @browser.div(class: /box cheque-box/).wait_until(&:present?)
-  @browser.p(class: /cart_navigation clearfix/).span.click
+  $purchase.confirm_payment.wait_until(&:present?)
+  $purchase.confirm_order_button.span.click
 end
 
 Then(/^I verify the order confirmation$/) do
-  @browser.div(class: /box order-confirmation/).wait_until(&:present?)
-  expect(@browser.div(class: /box order-confirmation/).text.include?('Your order will be sent as soon as we receive your payment.')).to be true
+  $purchase.order_confirmation.wait_until(&:present?)
+  expect($purchase.order_confirmation.text.include?('Your order will be sent as soon as we receive your payment.')).to be true
 end
 
 And(/^I will continue shopping and add new product$/) do
-  @browser.div(id: /layer_cart/).wait_until(&:present?)
-  @browser.div(class: /button-container/).span.click
-  @browser.img(class: /logo img-responsive/).click
-  @browser.divs(class: /product-container/)[1].wait_until(&:present?).click
-  @browser.div(class: /box-cart-bottom/).p.click
+  $purchase.product_add_successfully_layer.wait_until(&:present?)
+  $purchase.product_add_successfully_layer_continue_shopping.span.click
+  $purchase.home_page_logo.click
+  $purchase.product_container(1).wait_until(&:present?).click
+  $purchase.product_detail_cart_button.p.click
   sleep(5)
-  if @browser.div(class: /button-container/).a.present?
-    @browser.div(class: /button-container/).a.wait_until(&:present?).click
+  if $purchase.product_add_successfully_layer_continue_shopping.a.present?
+    $purchase.product_add_successfully_layer_continue_shopping.a.wait_until(&:present?).click
   end
-
 end
